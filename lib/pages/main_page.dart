@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:movies_catalog/constants/colors_app.dart';
+import 'package:movies_catalog/pages/widget_components/custom_card_thumbnail.dart';
+import 'package:movies_catalog/rest/service/api_service.dart';
 
 import '../rest/model/model_movie.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+  var value;
+  MainPage({super.key, required this.value});
 
   @override
   State<MainPage> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
-
-
-  PageController pageController = PageController(initialPage: 0,viewportFraction: 0.9);
-
+  PageController pageController =
+      PageController(initialPage: 0, viewportFraction: 0.9);
+  int currentPage = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -114,6 +116,48 @@ class _MainPageState extends State<MainPage> {
                     ),
                   ),
                   forYourCardLayout(),
+                  Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                      padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                          color: kSearchBoxColor,
+                          borderRadius: BorderRadius.circular(20)),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: buildPageIndicatorWidget(),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 20, horizontal: 30),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Popular',
+                              style: TextStyle(
+                                color: Colors.white54,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w300,
+                              ),
+                            ),
+                             Text(
+                              'See All',
+                              style: TextStyle(
+                                color: kButtonColor,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w300,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             )),
@@ -124,16 +168,46 @@ class _MainPageState extends State<MainPage> {
   }
 
   //for your cards layout
-  Widget forYourCardLayout(List<MovieModel> movieList){
+  Widget forYourCardLayout() {
     return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.67,
       child: PageView.builder(
         controller: pageController,
-        itemCount: movieList.length,
-        itemBuilder: (context,index){
-          return
+        itemCount: widget.value.length,
+        itemBuilder: (context, index) {
+          var value2 = widget.value;
+          return CustomCardThumbnail(
+            value: value2[index],
+          );
         },
-        ),
+        onPageChanged: (int page) {
+          setState(() {
+            currentPage = page;
+          });
+        },
+      ),
     );
   }
 
+  List<Widget> buildPageIndicatorWidget() {
+    List<Widget> list = [];
+
+    for (int i = 0; i <= 4; i++) {
+      list.add(i == currentPage ? _indicator(true) : _indicator(false));
+    }
+    return list;
+  }
+
+  Widget _indicator(bool isActive) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      margin: const EdgeInsets.symmetric(horizontal: 5.0),
+      height: 8.0,
+      width: 8,
+      decoration: BoxDecoration(
+        color: isActive ? Colors.white : Colors.white24,
+        borderRadius: BorderRadius.circular(20),
+      ),
+    );
+  }
 }
